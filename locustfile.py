@@ -1,7 +1,7 @@
 from cProfile import run
-from locust import HttpUser, TaskSet, task, constant
+import re
+from locust import HttpUser, TaskSet, task, constant_throughput, constant_pacing
 from locust import LoadTestShape
-import math
 import time
 
 class UserTasks(TaskSet):
@@ -11,67 +11,62 @@ class UserTasks(TaskSet):
         # self.client.get("/test2")
         # self.client.get("/test3")
 
-    
-# class WebsiteUser(HttpUser):
-#     wait_time = constant(1)
-#     tasks = [UserTasks]
-
-
-# class DoubleWave(LoadTestShape):
-#     """
-#     A shape to imitate some specific user behaviour. In this example, midday
-#     and evening meal times. First peak of users appear at time_limit/3 and
-#     second peak appears at 2*time_limit/3
-#     Settings:
-#         min_users -- minimum users
-#         peak_one_users -- users in first peak
-#         peak_two_users -- users in second peak
-#         time_limit -- total length of test
-#     """
-
-#     min_users = 20
-#     peak_one_users = 60
-#     peak_two_users = 40
-#     time_limit = 180
-
-#     def tick(self):
-#         run_time = round(self.get_run_time())
-
-#         if run_time < self.time_limit:
-#             user_count = (
-#                 (self.peak_one_users - self.min_users)
-#                 * math.e ** -(((run_time / (self.time_limit / 10 * 2 / 3)) - 5) ** 2)
-#                 + (self.peak_two_users - self.min_users)
-#                 * math.e ** -(((run_time / (self.time_limit / 10 * 2 / 3)) - 10) ** 2)
-#                 + self.min_users
-#             )
-#             return (round(user_count), round(user_count))
-#         else:
-#             return None
-
 
 class WebsiteUser(HttpUser):
-    wait_time = constant(1)
+    wait_time = constant_throughput(1)
     tasks = [UserTasks]
 
 
 class DoubleWave(LoadTestShape):
+    lakmus = 0
+    users = 0
+    peak_one = 50
+    time_peak_one = 60  # Seconds from start untill the end of peak one
+    flat = 50
+    time_flat = 120  # Seconds from start untill the end of flat phase
+    peak_two = 150
+    time_peak_two = 180  # Seconds from start untill the end of peak two
 
     def tick(self):
         run_time = round(self.get_run_time())
-        
-        if run_time < 60:
-            if run_time < 50:
-                user_count = run_time // 1.2
-                return(round(user_count), 1)
+
+        if run_time < self.time_peak_one: # 60
+            t = 60 / self.peak_one
+            if self.users >= self.peak_one:
+                self.users = self.peak_one
+                # time.sleep(t)
             else:
-                return (50, 1)
-        elif run_time < 120:
-            return (50, 1)
-        elif run_time < 180:
-            user_count = run_time * (run_time * 0.3)
-            return (round(user_count), 1)
-        elif run_time < 222:
-            return (0, 4)
+                self.users += 1
+                # time.sleep(t)
+            return (self.users, 1)
+        elif run_time < self.time_flat: # 120
+            self.users = self.flat
+            return (self.users, 1)
+        elif run_time < self.time_peak_two: # 180
+            self.users = self.peak_two
+            return (self.users, 2)
+            # dif = self.peak_two - self.flat # 60
+            # t = 60 / dif # 0.6
+            # if self.users >= self.peak_two:
+            #     self.users = self.peak_two
+            #     time.sleep(t)
+            #     return (round(self.users), 1)
+            # else:
+            #     self.users += 1
+            #     time.sleep(t)
+            # return (self.users, 1)
+        # elif self.users > 0:
+        #     self.users -= 5
+        #     time.sleep(3)
+        #     return (self.users, 1)
+        elif run_time < 335:
+            if self.lakmus == 0:
+                self.users -= 1
+                self.lakmus = 1
+                return (self.users, 1)
+            elif self.lakmus == 1:
+                self.lakmus = 0
+                return (self.users, 1)
         else:
             return None
+            
