@@ -1,5 +1,5 @@
 from cProfile import run
-from locust import HttpUser, TaskSet, task, constant_throughput, constant_pacing
+from locust import HttpUser, TaskSet, task, constant_throughput
 from locust import LoadTestShape
 
 class UserTasks(TaskSet):
