@@ -1,0 +1,30 @@
+version: "3"
+services:
+  app:
+    build:
+      dockerfile: ./app_build/Dockerfile
+      context: ../
+    command: uvicorn main:app --host 127.0.0.1
+    ports:
+      - "8000:8000"
+      
+  # master:
+  #     build:
+  #       dockerfile: ./locust_build/Dockerfile
+  #       context: ../
+  #     ports:
+  #      - "8089:8089"
+  #     command: -f locustfile.py --master -H http://0.0.0.0:8000
+    
+  # worker:
+  #   build:
+  #       dockerfile: ./locust_build/Dockerfile
+  #       context: ../
+  #   command: -f locustfile.py --worker --master-host master
+  locust:                   
+    build:
+      dockerfile: ./locust_build/Dockerfile
+      context: ../
+    command: locust
+    ports: 
+      - "8089:8089"
