@@ -1,17 +1,17 @@
-from cProfile import run
 from locust import HttpUser, TaskSet, task, constant_throughput
 from locust import LoadTestShape
 
 class UserTasks(TaskSet):
     @task
     def get_root(self):
-        self.client.get("/test1")
-        self.client.get("/test2")
-        self.client.get("/test3")
+        self.client.get("/test1") # <-- For your handler
+        self.client.get("/test2") # <-- For your handler
+        self.client.get("/test3") # <-- For your handler
 
 
 class WebsiteUser(HttpUser):
     wait_time = constant_throughput(1)
+    host = "http://127.0.0.1:8000" # <-- For your host
     tasks = [UserTasks]
 
 
