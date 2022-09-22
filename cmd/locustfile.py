@@ -11,7 +11,7 @@ class UserTasks(TaskSet):
 
 class WebsiteUser(HttpUser):
     wait_time = constant_throughput(1)
-    host = "http://127.0.0.1:8000" # <-- For your host
+    host = "fast_api_app # <-- For your host
     tasks = [UserTasks]
 
 
