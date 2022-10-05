@@ -4,27 +4,17 @@ services:
     build:
       dockerfile: ./app_build/Dockerfile
       context: ../
-    command: uvicorn main:app --host 127.0.0.1
+    command: uvicorn main:app --host 0.0.0.0
     ports:
       - "8000:8000"
-      
-  # master:
-  #     build:
-  #       dockerfile: ./locust_build/Dockerfile
-  #       context: ../
-  #     ports:
-  #      - "8089:8089"
-  #     command: -f locustfile.py --master -H http://0.0.0.0:8000
-    
-  # worker:
-  #   build:
-  #       dockerfile: ./locust_build/Dockerfile
-  #       context: ../
-  #   command: -f locustfile.py --worker --master-host master
+    container_name: fast_api_app
+
   locust:                   
     build:
       dockerfile: ./locust_build/Dockerfile
       context: ../
-    command: locust
+    command: locust --headless --html=./reports/locust-report.html 
     ports: 
       - "8089:8089"
+    volumes:
+      - (Set your directory)/reports:/app/reports
