@@ -11,7 +11,7 @@ class UserTasks(TaskSet):
 
 class WebsiteUser(HttpUser):
     wait_time = constant_throughput(1)
-    host = "fast_api_app # <-- For your host
+    host = "http://fast_api_app:8000" # <-- For your host
     tasks = [UserTasks]
 
 
@@ -30,7 +30,6 @@ class DoubleWave(LoadTestShape):
         run_time = round(self.get_run_time())
 
         if run_time < self.time_peak_one: # 60
-            t = 60 / self.peak_one
             if self.users >= self.peak_one:
                 self.users = self.peak_one
             else:
